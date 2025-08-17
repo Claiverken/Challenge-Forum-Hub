@@ -1,5 +1,6 @@
 package hub.forum.challenge.domain.answer;
 
+import hub.forum.challenge.domain.topico.Topico;
 import hub.forum.challenge.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,4 +26,17 @@ public class Answer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topico_id")
+    private Topico topico;
+
+
+    public Answer(Long id, String message, User author, Topico topico) {
+        this.id = id;
+        this.message = message;
+        this.author = author;
+        this.topico = topico;
+        this.creationDate = LocalDateTime.now();
+    }
 }

@@ -67,8 +67,11 @@ public class TopicoController {
     @GetMapping
     @Transactional
     public ResponseEntity<List<DadosListagemTopico>> listar() {
-        // Alterado de findAll() para o nosso novo método
-        var topicos = topicoRepository.findAllByStatusTrue().stream().map(DadosListagemTopico::new).toList();
+        // Agora usamos o novo método para buscar todos os tópicos que não estão FECHADO
+        var topicos = topicoRepository.findByStatusNot(StatusTopico.FECHADO)
+                .stream()
+                .map(DadosListagemTopico::new)
+                .toList();
         return ResponseEntity.ok(topicos);
     }
 
