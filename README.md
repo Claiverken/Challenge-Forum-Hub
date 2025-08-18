@@ -77,3 +77,13 @@ A seguir estão os principais endpoints disponíveis na API.
 | `PUT` | `/topicos/{id}` | **Sim** | Atualiza um tópico. Apenas o autor ou um admin pode executar. |
 | `DELETE` | `/topicos/{id}` | **Sim** | Apaga (logicamente) um tópico. Apenas o autor ou um admin pode executar. |
 | `POST` | `/topicos/{id}/respostas` | **Sim** | Adiciona uma nova resposta a um tópico. |
+# 🖼️ Imagens das Requisições via Insomnia
+<img width="1261" height="709" alt="Captura de tela 2025-08-18 022515" src="https://github.com/user-attachments/assets/c3071611-93c0-4ddb-952d-304349abe31d" />
+<img width="1266" height="712" alt="Captura de tela 2025-08-18 022738" src="https://github.com/user-attachments/assets/c70a71ce-915b-45a8-b7b3-33499b810826" />
+<img width="490" height="574" alt="Captura de tela 2025-08-18 022804" src="https://github.com/user-attachments/assets/e1e95491-19d7-46a3-9682-c8bb4222b23c" />
+<img width="1260" height="708" alt="Captura de tela 2025-08-18 022816" src="https://github.com/user-attachments/assets/56488db6-6bc1-4b4a-866f-b827cb45612d" />
+<img width="1263" height="711" alt="Captura de tela 2025-08-18 023205" src="https://github.com/user-attachments/assets/d22aced3-500b-45aa-8541-c20ec9f965fa" />
+<img width="1266" height="706" alt="Captura de tela 2025-08-18 023604" src="https://github.com/user-attachments/assets/970fcfb2-df60-4dd6-9ec0-fc2893fdd2d5" />
+<img width="1268" height="715" alt="Captura de tela 2025-08-18 023650" src="https://github.com/user-attachments/assets/a3e647bc-e084-442a-a669-276f3425e733" />
+<img width="1266" height="714" alt="Captura de tela 2025-08-18 023707" src="https://github.com/user-attachments/assets/432da7a6-93ea-4b0f-896d-7899a5e6ec27" />
+<img width="1268" height="713" alt="Captura de tela 2025-08-18 023844" src="https://github.com/user-attachments/assets/8dbc86f4-bf1e-4b8f-8887-504b39f1c0f0" />
