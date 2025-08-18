@@ -12,15 +12,25 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import hub.forum.challenge.infra.exception.TratamentoDeErrosDeAutenticacao;
+import hub.forum.challenge.infra.exception.TratamentoDeErroDeAcessoNegado;
 
 @Configuration // Indica ao Spring que esta é uma classe de configuração
 @EnableWebSecurity // Habilita e customiza as configurações de segurança
 public class SecurityConfigurations {
 
     private final SecurityFilter securityFilter;
+    private final TratamentoDeErrosDeAutenticacao tratamentoDeErrosDeAutenticacao;
+    private final TratamentoDeErroDeAcessoNegado tratamentoDeErroDeAcessoNegado;
 
-    public SecurityConfigurations(SecurityFilter securityFilter) {
+
+
+    public SecurityConfigurations(SecurityFilter securityFilter,
+                                  TratamentoDeErrosDeAutenticacao tratamentoDeErrosDeAutenticacao,
+                                  TratamentoDeErroDeAcessoNegado tratamentoDeErroDeAcessoNegado) {
         this.securityFilter = securityFilter;
+        this.tratamentoDeErrosDeAutenticacao = tratamentoDeErrosDeAutenticacao;
+        this.tratamentoDeErroDeAcessoNegado = tratamentoDeErroDeAcessoNegado;
     }
 
     @Bean
@@ -28,18 +38,27 @@ public class SecurityConfigurations {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
+                    // Permite acesso público ao endpoint de usuarios
+                    req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();
+
                     // Permite acesso público ao endpoint de login
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
 
                     // Permite acesso público para VISUALIZAR os tópicos
                     req.requestMatchers(HttpMethod.GET, "/topicos").permitAll();
-                    req.requestMatchers(HttpMethod.GET, "/topicos/**").permitAll(); // O "**" libera /topicos/1, /topicos/2, etc.
 
-                    // Todas as outras requisições (POST, PUT, DELETE) exigem autenticação
+                    //Permite acesso público a visualização de um tópico específico
+                    req.requestMatchers(HttpMethod.GET, "/topicos/**").permitAll();
+
+                    // Todas as outras requisições (POST, PUT, DELETE, GET /topicos/{id}) exigem autenticação
                     req.anyRequest().authenticated();
                 })
                 // Adiciona nosso filtro para ser executado antes do filtro padrão do Spring
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint(tratamentoDeErrosDeAutenticacao)
+                        .accessDeniedHandler(tratamentoDeErroDeAcessoNegado) // << LINHA ADICIONADA
+                )
                 .build();
     }
 

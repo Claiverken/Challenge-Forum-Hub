@@ -3,7 +3,6 @@ package hub.forum.challenge.domain.curso;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import hub.forum.challenge.domain.topico.Topico;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,7 +31,6 @@ public class Curso {
 
     public Curso(String nome, String categoria) {
         this.nome = nome;
-        // Podemos definir uma categoria padrão ou recebê-la também
         this.categoria = categoria;
     }
 }

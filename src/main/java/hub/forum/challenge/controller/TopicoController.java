@@ -11,11 +11,16 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.AccessDeniedException;
 import hub.forum.challenge.domain.user.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -41,38 +46,35 @@ public class TopicoController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroTopico dados, UriComponentsBuilder uriBuilder) {
-        var autor = userRepository.findByName(dados.autor()).orElseGet(() -> {
-            // AJUSTE: Criptografando a senha antes de salvar
-            var senhaCriptografada = passwordEncoder.encode("123456"); // Usamos "123456" como senha padrão
-            var novoUsuario = new User(dados.autor(), dados.autor().toLowerCase() + "@forum.hub", senhaCriptografada, Role.ROLE_USER);
-            return userRepository.save(novoUsuario);
-        });
+    public ResponseEntity cadastrar(
+            @RequestBody @Valid DadosCadastroTopico dados,
+            @AuthenticationPrincipal User autor, // 1. O autor vem do utilizador logado
+            UriComponentsBuilder uriBuilder) {
 
-        // 2. Adicionar lógica para encontrar ou criar o curso
+        // 2. Lógica para o curso com categoria opcional (usando o padrão "Geral")
         var curso = cursoRepository.findByNome(dados.curso()).orElseGet(() -> {
-            var novoCurso = new Curso(dados.curso(), dados.categoria());
-            return cursoRepository.save(novoCurso);
+            // Agora podemos passar dados.categoria() diretamente, mesmo que seja null
+            return cursoRepository.save(new Curso(dados.curso(), dados.categoria()));
         });
 
-        // 3. Usar o objeto 'curso' no construtor do Tópico
+        // 3. O 'autor' já é o utilizador correto, injetado pelo Spring Security.
         var topico = new Topico(dados.titulo(), dados.mensagem(), autor, curso);
         topicoRepository.save(topico);
 
         var uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(new DadosDetalhamentoTopico(topico));
+        return ResponseEntity.created(uri).body(new DadosRespostaTopicoCriado(topico));
     }
 
     @GetMapping
     @Transactional
-    public ResponseEntity<List<DadosListagemTopico>> listar() {
-        // Agora usamos o novo método para buscar todos os tópicos que não estão FECHADO
-        var topicos = topicoRepository.findByStatusNot(StatusTopico.FECHADO)
-                .stream()
-                .map(DadosListagemTopico::new)
-                .toList();
-        return ResponseEntity.ok(topicos);
+    public ResponseEntity<Page<DadosListagemTopico>> listar(
+            @PageableDefault(size = 10, sort = {"dataCriacao"}, direction = Sort.Direction.DESC) Pageable pageable) {
+
+        var page = topicoRepository.findByStatusNot(StatusTopico.FECHADO, pageable)
+                .map(DadosListagemTopico::new);
+
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{id}")
@@ -89,11 +91,11 @@ public class TopicoController {
 
         // Lógica de permissão: só pode atualizar se for o autor OU um admin
         if (!topico.getAutor().equals(usuarioLogado) && !usuarioLogado.getRole().equals(Role.ROLE_ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado: você só pode editar os seus próprios tópicos.");
+            throw new AccessDeniedException("Acesso negado: utilizador não tem permissão para alterar este tópico.");
         }
 
         topico.atualizarInformacoes(dados.titulo(), dados.mensagem());
-        return ResponseEntity.ok(new DadosDetalhamentoTopico(topico));
+        return ResponseEntity.ok(new DadosRespostaTopicoCriado(topico));
     }
 
 
@@ -104,7 +106,7 @@ public class TopicoController {
 
         // Lógica de permissão: só pode excluir se for o autor OU um admin
         if (!topico.getAutor().equals(usuarioLogado) && !usuarioLogado.getRole().equals(Role.ROLE_ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado: você só pode excluir os seus próprios tópicos.");
+            throw new AccessDeniedException("Acesso negado: utilizador não tem permissão para excluir este tópico.");
         }
 
         topico.fechar(); // Exclusão lógica

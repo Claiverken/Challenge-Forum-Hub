@@ -32,10 +32,9 @@ public class Answer {
     private Topico topico;
 
 
-    public Answer(Long id, String message, User author, Topico topico) {
-        this.id = id;
-        this.message = message;
-        this.author = author;
+    public Answer(DadosCadastroResposta dados, User autor, Topico topico) {
+        this.message = dados.message();
+        this.author = autor;
         this.topico = topico;
         this.creationDate = LocalDateTime.now();
     }

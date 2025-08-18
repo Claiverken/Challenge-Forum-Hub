@@ -1,0 +1,1 @@
+ALTER TABLE cursos ALTER COLUMN categoria DROP NOT NULL;

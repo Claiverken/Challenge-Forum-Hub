@@ -10,9 +10,8 @@ public record DadosCadastroTopico(
         @NotBlank
         String mensagem,
         @NotBlank
-        String autor,
-        @NotBlank
         String curso,
-        @NotBlank
-        String categoria) {
+
+        String categoria // Categoria é opcional (sem @NotBlank)
+) {
 }

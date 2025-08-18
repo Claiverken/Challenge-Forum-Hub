@@ -2,11 +2,12 @@ package hub.forum.challenge.controller;
 
 import hub.forum.challenge.domain.answer.Answer;
 import hub.forum.challenge.domain.answer.AnswerRepository;
+import hub.forum.challenge.domain.answer.DadosCadastroResposta;
 import hub.forum.challenge.domain.answer.DadosResposta;
-import hub.forum.challenge.domain.topico.StatusTopico;
 import hub.forum.challenge.domain.topico.TopicoRepository;
 import hub.forum.challenge.domain.user.User;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,20 +29,16 @@ public class RespostaController {
     @Transactional
     public ResponseEntity<DadosResposta> criarResposta(
             @PathVariable Long topicoId,
-            @RequestBody String message, // Recebe a mensagem como texto simples
+            @RequestBody @Valid DadosCadastroResposta dados,
             @AuthenticationPrincipal User autor,
             UriComponentsBuilder uriBuilder) {
 
-        var topico = topicoRepository.findById(topicoId)
-                .orElseThrow(() -> new IllegalArgumentException("Tópico não encontrado!"));
+        var topico = topicoRepository.getReferenceById(topicoId);
 
-        var resposta = new Answer(null, message, autor, topico);
+        var resposta = new Answer(dados, autor, topico);
         answerRepository.save(resposta);
 
-        // Opcional: Mudar o status do tópico para RESPONDIDO
-        if (topico.getStatus() == StatusTopico.NAO_RESPONDIDO) {
-            topico.marcarComoRespondido();
-        }
+        topico.marcarComoRespondido();
 
         var uri = uriBuilder.path("/respostas/{id}").buildAndExpand(resposta.getId()).toUri();
         return ResponseEntity.created(uri).body(new DadosResposta(resposta));

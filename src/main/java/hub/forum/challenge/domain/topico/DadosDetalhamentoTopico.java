@@ -1,10 +1,10 @@
 package hub.forum.challenge.domain.topico;
 
+import hub.forum.challenge.domain.answer.DadosResposta;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import hub.forum.challenge.domain.answer.DadosResposta;
-import hub.forum.challenge.domain.topico.StatusTopico;
 
 // DTO para exibir todos os dados de um tópico ao ser consultado individualmente.
 public record DadosDetalhamentoTopico(
