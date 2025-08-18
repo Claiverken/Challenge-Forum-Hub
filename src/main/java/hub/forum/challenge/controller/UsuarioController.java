@@ -6,6 +6,7 @@ import hub.forum.challenge.domain.user.User;
 import hub.forum.challenge.domain.user.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,8 +32,8 @@ public class UsuarioController {
     public ResponseEntity registrar(@RequestBody @Valid DadosCadastroUsuario dados, UriComponentsBuilder uriBuilder) {
         // Verifica se o email já existe
         if (userRepository.findByEmail(dados.email()) != null) {
-            // Em vez de lançar exceção, podemos retornar um 409 Conflict
-            return ResponseEntity.status(409).body("Email já registado.");
+            // Lança a exceção em vez de retornar uma resposta manual
+            throw new DataIntegrityViolationException("Email já registado.");
         }
 
         // Criptografa a senha antes de guardar

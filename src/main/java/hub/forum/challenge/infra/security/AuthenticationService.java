@@ -1,7 +1,6 @@
 package hub.forum.challenge.infra.security;
 
 import hub.forum.challenge.domain.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,8 +9,11 @@ import org.springframework.stereotype.Service;
 @Service // Anotação que indica ao Spring que esta é uma classe de serviço
 public class AuthenticationService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public AuthenticationService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * Este método é chamado pelo Spring Security ao autenticar um usuário.

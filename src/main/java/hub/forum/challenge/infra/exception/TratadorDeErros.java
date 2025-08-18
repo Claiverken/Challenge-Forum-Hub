@@ -2,6 +2,7 @@ package hub.forum.challenge.infra.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -64,12 +65,20 @@ public class TratadorDeErros {
         return ResponseEntity.status(status).body(erro);
     }
 
+    // Erro 409: Conflito de dados (ex: email já existente)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> tratarErroDeIntegridade(DataIntegrityViolationException ex, HttpServletRequest request) {
+        var status = HttpStatus.CONFLICT;
+        // Usamos ex.getMessage() para obter a nossa mensagem personalizada ("Email já registado.")
+        var erro = new ApiErrorResponse(status.value(), status.getReasonPhrase(), ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(erro);
+    }
+
     // Erro 500 (Erro Genérico)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> tratarErro500(Exception ex, HttpServletRequest request) {
         var status = HttpStatus.INTERNAL_SERVER_ERROR;
         var erro = new ApiErrorResponse(status.value(), status.getReasonPhrase(), "Erro interno do servidor", request.getRequestURI());
-        // Em ambiente de desenvolvimento, podes querer logar o erro completo: ex.printStackTrace();
         return ResponseEntity.status(status).body(erro);
     }
 }

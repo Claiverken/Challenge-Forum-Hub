@@ -8,41 +8,32 @@ import hub.forum.challenge.domain.user.User;
 import hub.forum.challenge.domain.user.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.access.AccessDeniedException;
-import hub.forum.challenge.domain.user.Role;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
-
-import java.util.List;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/topicos")
 public class TopicoController {
+    private final TopicoRepository topicoRepository;
+    private final CursoRepository cursoRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Renomeado para 'topicoRepository' para clareza
-    @Autowired
-    private TopicoRepository topicoRepository;
+    public TopicoController(PasswordEncoder passwordEncoder, TopicoRepository topicoRepository, CursoRepository cursoRepository, UserRepository userRepository) {
+        this.topicoRepository = topicoRepository;
+        this.cursoRepository = cursoRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    // Injete o PasswordEncoder
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // Injetar o novo CursoRepository
-    @Autowired
-    private CursoRepository cursoRepository;
-
-    // 1. ADICIONADO: Injeção do UserRepository que estava faltando
-    @Autowired
-    private UserRepository userRepository;
 
     @PostMapping
     @Transactional
